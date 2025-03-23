@@ -26,7 +26,7 @@ float sumDistances = 0;
 int totalCount = 0;
 
 float btnStartStopX, btnStartStopY, btnStartStopW, btnStartStopH;
-float btnResetViewX,  btnResetViewY,  btnResetViewW,  btnResetViewH;
+float btnResetViewX, btnResetViewY, btnResetViewW, btnResetViewH;
 
 boolean serialConnected = false;
 boolean showPortSelectorButton = false;
@@ -231,6 +231,13 @@ void drawButtons() {
   fill(0);
   text("Reset View", btnResetViewX + btnResetViewW/2, btnResetViewY + btnResetViewH/2);
 
+  fill(200);
+  stroke(0);
+  rect(width - 140, 50, 130, 30);
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text("Clear Data", width - 75, 65);
+
   textAlign(LEFT, BASELINE);
 }
 
@@ -238,11 +245,11 @@ void drawStats() {
   fill(0);
   textSize(14);
   float globalAvg = (totalCount > 0) ? (sumDistances / totalCount) : 0;
-  text("Min: " + nf(globalMin,1,2) + " mm   " +
-       "Max: " + nf(globalMax,1,2) + " mm   " +
-       "Avg: " + nf(globalAvg,1,2) + " mm   " +
-       "[Points: " + distances.size() + "]",
-       marginLeft, height - 10);
+  text("Min: " + nf(globalMin, 1, 2) + " mm   " +
+    "Max: " + nf(globalMax, 1, 2) + " mm   " +
+    "Avg: " + nf(globalAvg, 1, 2) + " mm   " +
+    "[Points: " + distances.size() + "]",
+    marginLeft, height - 10);
 }
 
 void serialEvent(Serial p) {
@@ -270,7 +277,8 @@ void serialEvent(Serial p) {
     if (distance > globalMax) globalMax = distance;
     sumDistances += distance;
     totalCount++;
-  } catch (Exception e) {
+  }
+  catch (Exception e) {
     println("⚠️ Malformed serial data or parse error: " + e);
   }
 }
@@ -291,7 +299,8 @@ void mousePressed() {
           output.println("Timestamp,Distance(mm)");
           serialConnected = true;
           println("✅ Connected to " + serialPorts[i]);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           println("⚠️ Failed to connect to " + serialPorts[i] + ": " + e);
         }
         return;
@@ -308,6 +317,19 @@ void mousePressed() {
         output.flush();
         output.close();
       }
+    }
+    
+    if (mouseX > width - 140 && mouseX < width - 10 && mouseY > 50 && mouseY < 80) {
+      println("🧹 Clearing data from graph...");
+      distances.clear();
+      timestamps.clear();
+      scrollOffset = 0;
+      xZoom = 1.0;
+      globalMin = Float.MAX_VALUE;
+      globalMax = Float.MIN_VALUE;
+      sumDistances = 0;
+      totalCount = 0;
+      return;
     }
   }
 
